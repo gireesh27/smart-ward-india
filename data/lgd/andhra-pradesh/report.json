@@ -1,0 +1,215 @@
+{
+  "generatedAt": "2026-11-19T07:49:57.632Z",
+  "state": {
+    "code": "28",
+    "name": "Andhra Pradesh"
+  },
+  "sources": {
+    "districts": "districtofSpecificState2026_11_19_13_07_38_965.xls",
+    "subdistricts": "subDistrictofSpecificState2026_11_19_13_07_39_048.xls",
+    "blocks": "blockofspecificState2026_11_19_13_08_13_509.xls",
+    "blockVillages": "allBlockStateWithCoveredVillage12026_11_19_13_08_14_505.xls",
+    "villages": "villageofSpecificState2026_11_19_13_07_41_419.xls",
+    "villageGp": "villageGramPanchayatMapping2026_11_19_13_08_13_231.xls",
+    "priWards": "priWards2026_11_19_13_08_08_399.xls",
+    "ulbs": "ulbSpecificState2026_11_19_13_07_41_577.xls",
+    "ulbWardsCov": "uLBWardforStateWithCov2026_11_19_13_07_43_379.xls",
+    "ulbWards": "uLBWardforState2026_11_19_13_07_42_060.xls"
+  },
+  "counts": {
+    "districts": 28,
+    "subdistricts": 688,
+    "villages": 17957,
+    "gramPanchayats": 13327,
+    "urbanLocalBodies": 124,
+    "wards": 245030,
+    "gpWards": 241107,
+    "ulbWards": 3923
+  },
+  "issues": {
+    "villagesWithoutGramPanchayat": 688,
+    "mappingRowsForUnknownVillages": 0,
+    "gramPanchayatsPlacedByZillaParishadName": 0,
+    "gramPanchayatsWithoutDistrict": 0,
+    "urbanLocalBodiesWithoutDistrictCoverage": 0,
+    "localBodiesWithoutWards": 0,
+    "duplicateWardCodesSkipped": 0,
+    "wardNumbersRenumbered": 164,
+    "priRowsByType": {
+      "Grama Panchayat": 241107,
+      "Mandal Panchayat": 39550,
+      "Zilla Parishad": 679,
+      "": 1
+    }
+  },
+  "perDistrict": {
+    "Alluri Sitharama Raju": {
+      "gramPanchayats": 244,
+      "urbanLocalBodies": 0,
+      "wards": 4880,
+      "villages": 2477
+    },
+    "Anakapalli": {
+      "gramPanchayats": 646,
+      "urbanLocalBodies": 2,
+      "wards": 12393,
+      "villages": 740
+    },
+    "Ananthapuramu": {
+      "gramPanchayats": 577,
+      "urbanLocalBodies": 7,
+      "wards": 11644,
+      "villages": 506
+    },
+    "Annamayya": {
+      "gramPanchayats": 411,
+      "urbanLocalBodies": 4,
+      "wards": 7171,
+      "villages": 362
+    },
+    "Bapatla": {
+      "gramPanchayats": 358,
+      "urbanLocalBodies": 3,
+      "wards": 5974,
+      "villages": 211
+    },
+    "Chittoor": {
+      "gramPanchayats": 622,
+      "urbanLocalBodies": 4,
+      "wards": 12293,
+      "villages": 767
+    },
+    "Dr. B.R. Ambedkar Konaseema": {
+      "gramPanchayats": 342,
+      "urbanLocalBodies": 3,
+      "wards": 6905,
+      "villages": 283
+    },
+    "East Godavari": {
+      "gramPanchayats": 342,
+      "urbanLocalBodies": 4,
+      "wards": 6748,
+      "villages": 323
+    },
+    "Eluru": {
+      "gramPanchayats": 547,
+      "urbanLocalBodies": 4,
+      "wards": 9001,
+      "villages": 668
+    },
+    "Guntur": {
+      "gramPanchayats": 258,
+      "urbanLocalBodies": 4,
+      "wards": 5176,
+      "villages": 224
+    },
+    "Kakinada": {
+      "gramPanchayats": 385,
+      "urbanLocalBodies": 7,
+      "wards": 7667,
+      "villages": 436
+    },
+    "Krishna": {
+      "gramPanchayats": 491,
+      "urbanLocalBodies": 5,
+      "wards": 4947,
+      "villages": 507
+    },
+    "Kurnool": {
+      "gramPanchayats": 484,
+      "urbanLocalBodies": 4,
+      "wards": 9200,
+      "villages": 472
+    },
+    "Markapuram": {
+      "gramPanchayats": 406,
+      "urbanLocalBodies": 3,
+      "wards": 8026,
+      "villages": 510
+    },
+    "Nandyal": {
+      "gramPanchayats": 489,
+      "urbanLocalBodies": 6,
+      "wards": 9502,
+      "villages": 457
+    },
+    "NTR": {
+      "gramPanchayats": 288,
+      "urbanLocalBodies": 5,
+      "wards": 3254,
+      "villages": 327
+    },
+    "Palnadu": {
+      "gramPanchayats": 527,
+      "urbanLocalBodies": 8,
+      "wards": 10086,
+      "villages": 364
+    },
+    "Parvathipuram Manyam": {
+      "gramPanchayats": 451,
+      "urbanLocalBodies": 3,
+      "wards": 8515,
+      "villages": 967
+    },
+    "Polavaram": {
+      "gramPanchayats": 186,
+      "urbanLocalBodies": 0,
+      "wards": 3684,
+      "villages": 834
+    },
+    "Prakasam": {
+      "gramPanchayats": 519,
+      "urbanLocalBodies": 6,
+      "wards": 10458,
+      "villages": 520
+    },
+    "Srikakulam": {
+      "gramPanchayats": 912,
+      "urbanLocalBodies": 4,
+      "wards": 17797,
+      "villages": 1472
+    },
+    "Sri Potti Sriramulu Nellore": {
+      "gramPanchayats": 700,
+      "urbanLocalBodies": 6,
+      "wards": 14069,
+      "villages": 718
+    },
+    "Sri Sathya Sai": {
+      "gramPanchayats": 467,
+      "urbanLocalBodies": 6,
+      "wards": 9148,
+      "villages": 461
+    },
+    "Tirupati": {
+      "gramPanchayats": 807,
+      "urbanLocalBodies": 6,
+      "wards": 15003,
+      "villages": 1082
+    },
+    "Visakhapatnam": {
+      "gramPanchayats": 79,
+      "urbanLocalBodies": 1,
+      "wards": 1668,
+      "villages": 165
+    },
+    "Vizianagaram": {
+      "gramPanchayats": 777,
+      "urbanLocalBodies": 4,
+      "wards": 15222,
+      "villages": 983
+    },
+    "West Godavari": {
+      "gramPanchayats": 393,
+      "urbanLocalBodies": 6,
+      "wards": 8032,
+      "villages": 319
+    },
+    "Y.S.R. Kadapa": {
+      "gramPanchayats": 619,
+      "urbanLocalBodies": 9,
+      "wards": 6567,
+      "villages": 802
+    }
+  }
+}

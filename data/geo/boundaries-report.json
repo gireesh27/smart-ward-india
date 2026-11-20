@@ -1,0 +1,89 @@
+{
+  "generatedAt": "2026-11-19T09:18:20.855Z",
+  "tolerance": 0.0007,
+  "sources": {
+    "districts": "AndhraPradesh_Districts.geojson",
+    "state": "India-States.shp",
+    "mandals": "MANDAL.geojson",
+    "constituencies": "Constituencies_AndhraPradesh_2024.geojson",
+    "meta": "Final_Andhra_Constituencies_2024.json"
+  },
+  "sourceDistricts": {
+    "features": 39,
+    "districts": 26,
+    "unmatched": [],
+    "lgdWithoutShape": [
+      "Markapuram",
+      "Polavaram"
+    ]
+  },
+  "mandals": {
+    "features": 696,
+    "methods": {
+      "exact": 565,
+      "spelling": 76,
+      "position": 32,
+      "split": 11,
+      "abbreviation": 6,
+      "unmatched": 1,
+      "alias": 5
+    },
+    "unmatched": [
+      "Bhadrachalam (East Godavari)"
+    ],
+    "lgdMandalsWithoutShape": [
+      "Adoni-2 (Kurnool)",
+      "Gudluru (Prakasam)",
+      "Gurthedu (Polavaram)",
+      "Karvetinagar (Chittoor)",
+      "K Gangavaram (Dr. B.R. Ambedkar Konaseema)",
+      "Rayavaram (East Godavari)",
+      "Yetapaka (Polavaram)"
+    ]
+  },
+  "districts": {
+    "districts": 28,
+    "parts": {
+      "Alluri Sitharama Raju": 1,
+      "Anakapalli": 1,
+      "Ananthapuramu": 1,
+      "Annamayya": 1,
+      "Bapatla": 1,
+      "Chittoor": 3,
+      "Dr. B.R. Ambedkar Konaseema": 2,
+      "East Godavari": 1,
+      "Eluru": 4,
+      "Guntur": 1,
+      "Kakinada": 1,
+      "Krishna": 4,
+      "Kurnool": 1,
+      "Markapuram": 1,
+      "Nandyal": 1,
+      "NTR": 1,
+      "Palnadu": 1,
+      "Parvathipuram Manyam": 2,
+      "Polavaram": 1,
+      "Prakasam": 2,
+      "Srikakulam": 1,
+      "Sri Potti Sriramulu Nellore": 1,
+      "Sri Sathya Sai": 1,
+      "Tirupati": 1,
+      "Visakhapatnam": 1,
+      "Vizianagaram": 1,
+      "West Godavari": 1,
+      "Y.S.R. Kadapa": 1
+    },
+    "lgdWithoutShape": [],
+    "method": "mandals dissolved by LGD district"
+  },
+  "referenceOutline": {
+    "source": "India-States.shp",
+    "file": "andhra-pradesh-soi.geojson"
+  },
+  "constituencies": {
+    "constituencies": 175,
+    "withoutMetadata": 0,
+    "mandalsAssigned": 696
+  },
+  "attribution": "Boundaries: project-supplied Andhra Pradesh district, mandal and assembly-constituency layers; state outline: Survey of India reference data (via DataMeet), CC BY 4.0."
+}

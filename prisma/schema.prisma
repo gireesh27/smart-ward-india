@@ -1,0 +1,849 @@
+// Smart Ward India — relational schema
+// User/Session/Account/Verification follow the Better Auth Prisma adapter contract.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CITIZEN
+  WARD_ADMIN
+  DISTRICT_ADMIN
+  SUPER_ADMIN
+}
+
+enum LocalBodyType {
+  MANDAL
+  MUNICIPALITY
+  MUNICIPAL_CORPORATION
+  NAGAR_PANCHAYAT
+  GRAM_PANCHAYAT
+}
+
+enum ComplaintStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  REJECTED
+  DUPLICATE
+  REOPEN_REQUESTED
+  REOPENED
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum Visibility {
+  PUBLIC
+  INTERNAL
+}
+
+enum AttachmentPurpose {
+  COMPLAINT
+  COMMENT
+  RESOLUTION
+  PROJECT_PHOTO
+  PROJECT_DOCUMENT
+}
+
+enum ProjectStatus {
+  PLANNED
+  IN_PROGRESS
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum ProgressMode {
+  MILESTONES
+  MANUAL
+}
+
+enum InsightSeverity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum InsightStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+  DISMISSED
+}
+
+enum InquiryType {
+  GOVERNMENT
+  CSR
+  INNOVATION
+  GENERAL
+}
+
+enum InquiryStatus {
+  NEW
+  IN_REVIEW
+  RESPONDED
+  CLOSED
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum ActionItemStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+}
+
+enum ReportType {
+  COMPLAINTS
+  WARDS
+  PROJECTS
+}
+
+enum ExportFormat {
+  CSV
+  PDF
+}
+
+// ─── Identity ────────────────────────────────────────────────────────────────
+
+model User {
+  id            String   @id
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  phone         String?
+  role          Role     @default(CITIZEN)
+  isActive      Boolean  @default(true)
+  wardId        String?
+  ward          Ward?    @relation(fields: [wardId], references: [id], onDelete: SetNull)
+  notifyEmail   Boolean  @default(true)
+  notifyInApp   Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sessions              Session[]
+  accounts              Account[]
+  scopes                AdminScope[]
+  complaints            Complaint[]              @relation("Reporter")
+  comments              ComplaintComment[]
+  statusChanges         ComplaintStatusHistory[]
+  assignmentsMade       ComplaintAssignment[]
+  feedback              ComplaintFeedback[]
+  attachments           Attachment[]
+  notifications         Notification[]
+  projectsCreated       Project[]                @relation("ProjectCreator")
+  progressLogs          ProjectProgressLog[]
+  meetingsCreated       Meeting[]                @relation("MeetingCreator")
+  meetingParticipations MeetingParticipant[]
+  announcements         Announcement[]
+  auditLogs             AuditLog[]
+  reportExports         ReportExport[]
+  supports              ComplaintSupport[]
+  aiReports             AiReport[]
+
+  @@index([role])
+  @@index([wardId])
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@index([userId])
+}
+
+// Stores password-reset tokens (single use, expiring) and other auth verifications.
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@index([identifier])
+}
+
+// Geographic scope of an administrator. Exactly one of the four ids is set.
+model AdminScope {
+  id          String     @id @default(cuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stateId     String?
+  state       State?     @relation(fields: [stateId], references: [id], onDelete: Cascade)
+  districtId  String?
+  district    District?  @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  localBodyId String?
+  localBody   LocalBody? @relation(fields: [localBodyId], references: [id], onDelete: Cascade)
+  wardId      String?
+  ward        Ward?      @relation(fields: [wardId], references: [id], onDelete: Cascade)
+  createdAt   DateTime   @default(now())
+
+  @@index([userId])
+}
+
+// ─── Geography ───────────────────────────────────────────────────────────────
+
+model State {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  code      String       @unique
+  lgdCode   String?      @unique
+  districts District[]
+  scopes    AdminScope[]
+}
+
+// Geography mirrors the Local Government Directory (lgdirectory.gov.in); lgdCode is
+// the official code, so imports can be re-run to pick up LGD changes.
+model District {
+  id            String         @id @default(cuid())
+  name          String
+  nameLocal     String?
+  code          String         @unique
+  lgdCode       String?        @unique
+  census2011    String?
+  stateId       String
+  state         State          @relation(fields: [stateId], references: [id], onDelete: Restrict)
+  latitude      Float?
+  longitude     Float?
+  subDistricts  SubDistrict[]
+  localBodies   LocalBody[]
+  villages      Village[]
+  scopes        AdminScope[]
+  meetings      Meeting[]
+  announcements Announcement[]
+  aiReports     AiReport[]
+
+  @@unique([stateId, name])
+}
+
+// Revenue mandal (LGD "sub-district").
+model SubDistrict {
+  id          String      @id @default(cuid())
+  lgdCode     String      @unique
+  name        String
+  nameLocal   String?
+  districtId  String
+  district    District    @relation(fields: [districtId], references: [id], onDelete: Restrict)
+  localBodies LocalBody[]
+  villages    Village[]
+
+  @@index([districtId])
+}
+
+// "Panchayat / Municipality" level: Gram Panchayats and urban local bodies.
+model LocalBody {
+  id            String        @id @default(cuid())
+  name          String
+  type          LocalBodyType
+  lgdCode       String?       @unique
+  districtId    String
+  district      District      @relation(fields: [districtId], references: [id], onDelete: Restrict)
+  subDistrictId String?
+  subDistrict   SubDistrict?  @relation(fields: [subDistrictId], references: [id], onDelete: SetNull)
+  blockName     String?
+  villageCount  Int           @default(0)
+  isActive      Boolean       @default(true)
+  wards         Ward[]
+  villages      Village[]
+  scopes        AdminScope[]
+
+  @@index([districtId, type])
+  @@index([subDistrictId])
+  @@index([name])
+}
+
+model Ward {
+  id            String             @id @default(cuid())
+  number        Int
+  name          String
+  nameLocal     String?
+  lgdCode       String?            @unique
+  localBodyId   String
+  localBody     LocalBody          @relation(fields: [localBodyId], references: [id], onDelete: Restrict)
+  latitude      Float?
+  longitude     Float?
+  population    Int?
+  isActive      Boolean            @default(true)
+  createdAt     DateTime           @default(now())
+  residents     User[]
+  complaints    Complaint[]
+  projects      Project[]
+  readings      IndicatorReading[]
+  snapshots     ScoreSnapshot[]
+  insights      Insight[]
+  scopes        AdminScope[]
+  meetings      Meeting[]
+  announcements Announcement[]
+
+  @@unique([localBodyId, number])
+  @@index([localBodyId])
+}
+
+// Revenue villages, mapped to their Gram Panchayat (helps residents find their Panchayat).
+model Village {
+  id            String       @id @default(cuid())
+  lgdCode       String       @unique
+  name          String
+  nameLocal     String?
+  status        String?
+  districtId    String
+  district      District     @relation(fields: [districtId], references: [id], onDelete: Restrict)
+  subDistrictId String?
+  subDistrict   SubDistrict? @relation(fields: [subDistrictId], references: [id], onDelete: SetNull)
+  localBodyId   String?
+  localBody     LocalBody?   @relation(fields: [localBodyId], references: [id], onDelete: SetNull)
+
+  @@index([name])
+  @@index([localBodyId])
+}
+
+// ─── Organisation ────────────────────────────────────────────────────────────
+
+model Department {
+  id          String                @id @default(cuid())
+  name        String                @unique
+  code        String                @unique
+  email       String?
+  phone       String?
+  isActive    Boolean               @default(true)
+  createdAt   DateTime              @default(now())
+  categories  Category[]
+  staff       StaffMember[]
+  complaints  Complaint[]
+  assignments ComplaintAssignment[]
+  projects    Project[]
+}
+
+// Field staff are records, not login accounts; complaints can be routed to them.
+model StaffMember {
+  id           String                @id @default(cuid())
+  name         String
+  designation  String
+  email        String?
+  phone        String?
+  departmentId String
+  department   Department            @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  isActive     Boolean               @default(true)
+  createdAt    DateTime              @default(now())
+  complaints   Complaint[]           @relation("AssignedStaff")
+  assignments  ComplaintAssignment[]
+
+  @@index([departmentId])
+}
+
+model Category {
+  id           String      @id @default(cuid())
+  slug         String      @unique
+  name         String
+  description  String?
+  icon         String
+  color        String
+  slaHours     Int         @default(72)
+  sortOrder    Int         @default(0)
+  isActive     Boolean     @default(true)
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  complaints   Complaint[]
+  projects     Project[]
+  insights     Insight[]
+}
+
+// ─── Complaints ──────────────────────────────────────────────────────────────
+
+model Complaint {
+  id              String                   @id @default(cuid())
+  reference       String                   @unique
+  title           String
+  description     String
+  categoryId      String
+  category        Category                 @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  wardId          String
+  ward            Ward                     @relation(fields: [wardId], references: [id], onDelete: Restrict)
+  reporterId      String
+  reporter        User                     @relation("Reporter", fields: [reporterId], references: [id], onDelete: Restrict)
+  address         String
+  landmark        String?
+  latitude        Float?
+  longitude       Float?
+  severity        Severity                 @default(MEDIUM)
+  priority        Priority                 @default(MEDIUM)
+  status          ComplaintStatus          @default(SUBMITTED)
+  departmentId    String?
+  department      Department?              @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  assignedStaffId String?
+  assignedStaff   StaffMember?             @relation("AssignedStaff", fields: [assignedStaffId], references: [id], onDelete: SetNull)
+  duplicateOfId   String?
+  duplicateOf     Complaint?               @relation("Duplicates", fields: [duplicateOfId], references: [id], onDelete: SetNull)
+  duplicates      Complaint[]              @relation("Duplicates")
+  resolutionNote  String?
+  dueAt           DateTime?
+  resolvedAt      DateTime?
+  closedAt        DateTime?
+  idempotencyKey  String?
+  // Opt-in: other residents may see the title, category, ward and status, and support it.
+  isPublic        Boolean                  @default(false)
+  supportCount    Int                      @default(0)
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  history         ComplaintStatusHistory[]
+  comments        ComplaintComment[]
+  assignments     ComplaintAssignment[]
+  feedback        ComplaintFeedback[]
+  attachments     Attachment[]
+  supports        ComplaintSupport[]
+
+  @@unique([reporterId, idempotencyKey])
+  @@index([wardId, isPublic, status])
+  @@index([wardId, status])
+  @@index([categoryId, createdAt])
+  @@index([createdAt])
+  @@index([resolvedAt])
+  @@index([status, dueAt])
+}
+
+// "Me too": a resident confirming someone else's public report. One per person per complaint.
+model ComplaintSupport {
+  id          String    @id @default(cuid())
+  complaintId String
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@unique([complaintId, userId])
+  @@index([userId])
+}
+
+model ComplaintStatusHistory {
+  id          String           @id @default(cuid())
+  complaintId String
+  complaint   Complaint        @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  fromStatus  ComplaintStatus?
+  toStatus    ComplaintStatus
+  actorId     String?
+  actor       User?            @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  reason      String?
+  createdAt   DateTime         @default(now())
+
+  @@index([complaintId, createdAt])
+}
+
+model ComplaintComment {
+  id          String       @id @default(cuid())
+  complaintId String
+  complaint   Complaint    @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User         @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  body        String
+  visibility  Visibility   @default(PUBLIC)
+  createdAt   DateTime     @default(now())
+  attachments Attachment[]
+
+  @@index([complaintId, createdAt])
+}
+
+model ComplaintAssignment {
+  id           String       @id @default(cuid())
+  complaintId  String
+  complaint    Complaint    @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  departmentId String?
+  department   Department?  @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  staffId      String?
+  staff        StaffMember? @relation(fields: [staffId], references: [id], onDelete: SetNull)
+  assignedById String
+  assignedBy   User         @relation(fields: [assignedById], references: [id], onDelete: Restrict)
+  note         String?
+  createdAt    DateTime     @default(now())
+
+  @@index([complaintId])
+}
+
+model ComplaintFeedback {
+  id          String    @id @default(cuid())
+  complaintId String
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  citizenId   String
+  citizen     User      @relation(fields: [citizenId], references: [id], onDelete: Restrict)
+  rating      Int
+  satisfied   Boolean
+  comment     String?
+  createdAt   DateTime  @default(now())
+
+  @@index([complaintId])
+  @@index([createdAt])
+}
+
+// Files live in object storage; this row is the access-control record.
+model Attachment {
+  id          String            @id @default(cuid())
+  storageKey  String            @unique
+  fileName    String
+  mimeType    String
+  size        Int
+  purpose     AttachmentPurpose
+  uploaderId  String
+  uploader    User              @relation(fields: [uploaderId], references: [id], onDelete: Restrict)
+  complaintId String?
+  complaint   Complaint?        @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  commentId   String?
+  comment     ComplaintComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  projectId   String?
+  project     Project?          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  isPublic    Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+
+  @@index([complaintId])
+  @@index([commentId])
+  @@index([projectId])
+  @@index([uploaderId, createdAt])
+}
+
+// ─── Projects ────────────────────────────────────────────────────────────────
+
+model Project {
+  id           String               @id @default(cuid())
+  code         String               @unique
+  name         String
+  description  String
+  categoryId   String
+  category     Category             @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  wardId       String
+  ward         Ward                 @relation(fields: [wardId], references: [id], onDelete: Restrict)
+  departmentId String?
+  department   Department?          @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  budget       Decimal              @db.Decimal(14, 2)
+  expenditure  Decimal              @default(0) @db.Decimal(14, 2)
+  startDate    DateTime
+  targetDate   DateTime
+  completedAt  DateTime?
+  status       ProjectStatus        @default(PLANNED)
+  progress     Int                  @default(0)
+  progressMode ProgressMode         @default(MILESTONES)
+  isPublic     Boolean              @default(true)
+  archivedAt   DateTime?
+  createdById  String
+  createdBy    User                 @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  milestones   Milestone[]
+  progressLogs ProjectProgressLog[]
+  attachments  Attachment[]
+
+  @@index([wardId, status])
+  @@index([archivedAt])
+}
+
+model Milestone {
+  id          String    @id @default(cuid())
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  dueDate     DateTime?
+  completedAt DateTime?
+  weight      Int       @default(1)
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+
+  @@index([projectId])
+}
+
+model ProjectProgressLog {
+  id        String       @id @default(cuid())
+  projectId String
+  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  progress  Int
+  note      String?
+  source    ProgressMode
+  actorId   String
+  actor     User         @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  createdAt DateTime     @default(now())
+
+  @@index([projectId, createdAt])
+}
+
+// ─── Indicators, scores, insights ────────────────────────────────────────────
+
+model IndicatorDefinition {
+  id             String             @id @default(cuid())
+  key            String             @unique
+  name           String
+  unit           String
+  description    String?
+  icon           String             @default("gauge")
+  weight         Float
+  target         Float
+  worst          Float              @default(0)
+  higherIsBetter Boolean            @default(true)
+  isActive       Boolean            @default(true)
+  sortOrder      Int                @default(0)
+  readings       IndicatorReading[]
+}
+
+model IndicatorReading {
+  id          String              @id @default(cuid())
+  wardId      String
+  ward        Ward                @relation(fields: [wardId], references: [id], onDelete: Cascade)
+  indicatorId String
+  indicator   IndicatorDefinition @relation(fields: [indicatorId], references: [id], onDelete: Cascade)
+  period      DateTime            @db.Date
+  value       Float
+  source      String              @default("manual")
+  createdAt   DateTime            @default(now())
+
+  @@unique([wardId, indicatorId, period])
+  @@index([period])
+}
+
+model ScoreSnapshot {
+  id         String   @id @default(cuid())
+  wardId     String
+  ward       Ward     @relation(fields: [wardId], references: [id], onDelete: Cascade)
+  period     DateTime @db.Date
+  score      Float?
+  coverage   Float
+  breakdown  Json
+  computedAt DateTime @default(now())
+
+  @@unique([wardId, period])
+  @@index([period])
+}
+
+model Insight {
+  id              String          @id @default(cuid())
+  ruleKey         String
+  fingerprint     String          @unique
+  wardId          String?
+  ward            Ward?           @relation(fields: [wardId], references: [id], onDelete: Cascade)
+  categoryId      String?
+  category        Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  severity        InsightSeverity
+  title           String
+  summary         String
+  evidence        Json
+  suggestedAction String
+  link            String
+  status          InsightStatus   @default(OPEN)
+  generatedAt     DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([status, severity])
+  @@index([wardId])
+}
+
+// ─── Engagement ──────────────────────────────────────────────────────────────
+
+// LLM-generated analysis. `context` is the exact aggregate (non-personal) data sent to the model.
+model AiReport {
+  id          String    @id @default(cuid())
+  districtId  String?
+  district    District? @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  provider    String
+  model       String
+  status      String    @default("OK")
+  insights    Json
+  context     Json
+  error       String?
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt   DateTime  @default(now())
+
+  @@index([districtId, createdAt])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  body      String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt, createdAt])
+}
+
+model Meeting {
+  id           String               @id @default(cuid())
+  title        String
+  agenda       String
+  scheduledAt  DateTime
+  durationMins Int                  @default(60)
+  location     String
+  status       MeetingStatus        @default(SCHEDULED)
+  minutes      String?
+  districtId   String?
+  district     District?            @relation(fields: [districtId], references: [id], onDelete: SetNull)
+  wardId       String?
+  ward         Ward?                @relation(fields: [wardId], references: [id], onDelete: SetNull)
+  createdById  String
+  createdBy    User                 @relation("MeetingCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  participants MeetingParticipant[]
+  actionItems  ActionItem[]
+
+  @@index([scheduledAt])
+}
+
+model MeetingParticipant {
+  id        String  @id @default(cuid())
+  meetingId String
+  meeting   Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name      String
+  email     String?
+  role      String?
+
+  @@index([meetingId])
+}
+
+model ActionItem {
+  id          String           @id @default(cuid())
+  meetingId   String
+  meeting     Meeting          @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  description String
+  ownerName   String
+  dueDate     DateTime?
+  status      ActionItemStatus @default(OPEN)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([meetingId])
+  @@index([status, dueDate])
+}
+
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  body        String
+  districtId  String?
+  district    District? @relation(fields: [districtId], references: [id], onDelete: SetNull)
+  wardId      String?
+  ward        Ward?     @relation(fields: [wardId], references: [id], onDelete: SetNull)
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([isPublished, publishedAt])
+}
+
+model PartnerInquiry {
+  id           String        @id @default(cuid())
+  name         String
+  organization String?
+  email        String
+  phone        String?
+  type         InquiryType   @default(GENERAL)
+  message      String
+  status       InquiryStatus @default(NEW)
+  internalNote String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([status, createdAt])
+}
+
+// ─── Platform ────────────────────────────────────────────────────────────────
+
+// Site content (content.*) and configuration (scoring.*, insights.*) as JSON values.
+model Setting {
+  key         String   @id
+  value       Json
+  updatedById String?
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   String?
+  summary    String?
+  before     Json?
+  after      Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([actorId])
+}
+
+model ReportExport {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      ReportType
+  format    ExportFormat
+  filters   Json
+  rowCount  Int
+  createdAt DateTime     @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model RateLimitBucket {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+}

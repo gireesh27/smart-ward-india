@@ -1,0 +1,59 @@
+# Production / pilot stack on one server (e.g. Oracle Cloud Always Free, Hyderabad). docs/DEPLOYMENT.md
+#   cp deploy/.env.production.example deploy/.env.production   (fill it in)
+#   docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.production up -d
+name: smartward
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-smartward}
+      POSTGRES_USER: ${POSTGRES_USER:-smartward}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-smartward} -d ${POSTGRES_DB:-smartward}"]
+      interval: 10s
+      retries: 10
+    restart: unless-stopped
+
+  app:
+    image: ${APP_IMAGE:?set APP_IMAGE, e.g. ghcr.io/<owner>/smart-ward-india:latest}
+    env_file: .env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/storage/uploads
+    restart: unless-stopped
+
+  caddy:
+    image: ${CADDY_IMAGE:-caddy:2-alpine}
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  # One-off admin tasks: LGD import, boundary preparation.
+  #   docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.production --profile tools run --rm tools npm run lgd:import
+  tools:
+    image: ${TOOLS_IMAGE:?set TOOLS_IMAGE, e.g. ghcr.io/<owner>/smart-ward-india:latest-tools}
+    profiles: ["tools"]
+    env_file: .env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  uploads:
+  caddy_data:
+  caddy_config:

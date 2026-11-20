@@ -1,0 +1,15 @@
+node_modules
+.next
+.env
+.env.*
+!.env.example
+.git
+playwright-report
+test-results
+coverage
+docs/reference
+storage/
+data/lgd/raw
+data/geo/source
+deploy/.env.production
+deploy/backups

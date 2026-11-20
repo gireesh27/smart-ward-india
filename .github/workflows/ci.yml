@@ -1,0 +1,36 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: smartward, POSTGRES_PASSWORD: smartward, POSTGRES_DB: smartward_test }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U smartward" --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://smartward:smartward@localhost:5432/smartward_test
+      TEST_DATABASE_URL: postgresql://smartward:smartward@localhost:5432/smartward_test
+      BETTER_AUTH_SECRET: ci-only-secret-0123456789abcdef0123456789abcdef
+      APP_URL: http://localhost:3000
+      MAIL_TRANSPORT: console
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      # npm ci needs package-lock.json: commit the one `npm install` creates on your machine.
+      # Until then the workflow falls back to npm install.
+      - name: Install dependencies
+        run: if [ -f package-lock.json ]; then npm ci; else npm install --no-audit --no-fund; fi
+      - run: npx prisma generate
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run verify:domain
+      - run: npm run test:unit
+      - run: npm run test:integration
+      - run: npm run build

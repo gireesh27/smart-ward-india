@@ -1,0 +1,96 @@
+/**
+ * The app's single icon family: Phosphor Icons (MIT, phosphoricons.com), "regular" weight by default.
+ * Components import from here, never from an icon package directly, so the whole UI stays one
+ * consistent style and a renamed icon is a one-line fix. Names are kept from the earlier icon set
+ * to avoid churn; the right-hand side is the Phosphor icon actually rendered.
+ * Server-component safe: the /dist/ssr entry has no React context.
+ */
+import { CheckCircle as PhCheckCircle } from "@phosphor-icons/react/dist/ssr";
+import type { IconProps } from "@phosphor-icons/react";
+
+export {
+  Warning as AlertTriangle,
+  ArrowDown,
+  ArrowRight,
+  ArrowUp,
+  ArrowsDownUp as ArrowUpDown,
+  ChartBar as BarChart3,
+  Bell,
+  Brain,
+  Briefcase,
+  Buildings as Building2,
+  Calendar as CalendarDays,
+  Camera,
+  Check,
+  CaretRight as ChevronRight,
+  CaretUpDown as ChevronsUpDown,
+  Clipboard as ClipboardList,
+  Barricade as Construction,
+  Cpu,
+  Crosshair,
+  DownloadSimple as Download,
+  Drop as Droplet,
+  Drop as Droplets,
+  Eye,
+  FileText as FileBarChart,
+  FileText,
+  Gauge,
+  Globe,
+  GraduationCap,
+  HandCoins,
+  Handshake,
+  Question as HelpCircle,
+  House as Home,
+  Hospital,
+  ImageSquare,
+  Info,
+  Lamp,
+  Bank as Landmark,
+  GridFour as LayoutDashboard,
+  GridFour as LayoutGrid,
+  Leaf,
+  Lightbulb,
+  ChartLine as LineChart,
+  CircleNotch as Loader2,
+  Crosshair as LocateFixed,
+  Lock,
+  SignIn as LogIn,
+  SignOut as LogOut,
+  Envelope as Mail,
+  MapPin,
+  ArrowsOut as Maximize2,
+  Megaphone,
+  List as Menu,
+  ChatCircle as MessageSquare,
+  ArrowsIn as Minimize2,
+  Minus,
+  Monitor,
+  Moon,
+  Paperclip,
+  Plus,
+  RoadHorizon,
+  RocketLaunch as Rocket,
+  MagnifyingGlass as Search,
+  Gear as Settings,
+  ShieldCheck,
+  Sparkle as Sparkles,
+  Plant as Sprout,
+  Star,
+  Sun,
+  Tag as Tags,
+  Target,
+  ThumbsUp,
+  Trash as Trash2,
+  TrendUp as TrendingUp,
+  Trophy,
+  Users,
+  Waves,
+  X,
+  Lightning as Zap,
+} from "@phosphor-icons/react/dist/ssr";
+export type { Icon as LucideIcon, IconProps } from "@phosphor-icons/react";
+
+/** Solid check used for bullet lists ("fill" weight). */
+export function CheckCircle2(props: IconProps) {
+  return <PhCheckCircle weight="fill" {...props} />;
+}

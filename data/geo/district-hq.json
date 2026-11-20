@@ -1,0 +1,143 @@
+{
+  "_note": "Approximate coordinates of each district headquarters town (WGS84), used for district markers and map centring — not boundaries. Updated for the reorganisation effective 31 Dec 2025: Polavaram district HQ Rampachodavaram; Annamayya district HQ moved from Rayachoti to Madanapalle; Markapuram district HQ Markapuram.",
+  "745": {
+    "hq": "Paderu",
+    "lat": 18.072,
+    "lng": 82.668
+  },
+  "744": {
+    "hq": "Anakapalli",
+    "lat": 17.691,
+    "lng": 83.004
+  },
+  "502": {
+    "hq": "Anantapur",
+    "lat": 14.681,
+    "lng": 77.6
+  },
+  "753": {
+    "hq": "Madanapalle",
+    "lat": 13.55,
+    "lng": 78.503
+  },
+  "750": {
+    "hq": "Bapatla",
+    "lat": 15.904,
+    "lng": 80.467
+  },
+  "503": {
+    "hq": "Chittoor",
+    "lat": 13.217,
+    "lng": 79.1
+  },
+  "747": {
+    "hq": "Amalapuram",
+    "lat": 16.578,
+    "lng": 82.006
+  },
+  "505": {
+    "hq": "Rajamahendravaram",
+    "lat": 17.005,
+    "lng": 81.777
+  },
+  "748": {
+    "hq": "Eluru",
+    "lat": 16.711,
+    "lng": 81.095
+  },
+  "506": {
+    "hq": "Guntur",
+    "lat": 16.306,
+    "lng": 80.437
+  },
+  "746": {
+    "hq": "Kakinada",
+    "lat": 16.989,
+    "lng": 82.247
+  },
+  "510": {
+    "hq": "Machilipatnam",
+    "lat": 16.187,
+    "lng": 81.139
+  },
+  "511": {
+    "hq": "Kurnool",
+    "lat": 15.828,
+    "lng": 78.037
+  },
+  "790": {
+    "hq": "Markapuram",
+    "lat": 15.735,
+    "lng": 79.27
+  },
+  "755": {
+    "hq": "Nandyal",
+    "lat": 15.478,
+    "lng": 78.484
+  },
+  "749": {
+    "hq": "Vijayawada",
+    "lat": 16.506,
+    "lng": 80.648
+  },
+  "751": {
+    "hq": "Narasaraopet",
+    "lat": 16.235,
+    "lng": 80.049
+  },
+  "743": {
+    "hq": "Parvathipuram",
+    "lat": 18.783,
+    "lng": 83.426
+  },
+  "791": {
+    "hq": "Rampachodavaram",
+    "lat": 17.44,
+    "lng": 81.776
+  },
+  "517": {
+    "hq": "Ongole",
+    "lat": 15.503,
+    "lng": 80.044
+  },
+  "519": {
+    "hq": "Srikakulam",
+    "lat": 18.297,
+    "lng": 83.897
+  },
+  "515": {
+    "hq": "Nellore",
+    "lat": 14.443,
+    "lng": 79.986
+  },
+  "754": {
+    "hq": "Puttaparthi",
+    "lat": 14.165,
+    "lng": 77.811
+  },
+  "752": {
+    "hq": "Tirupati",
+    "lat": 13.629,
+    "lng": 79.419
+  },
+  "520": {
+    "hq": "Visakhapatnam",
+    "lat": 17.686,
+    "lng": 83.218
+  },
+  "521": {
+    "hq": "Vizianagaram",
+    "lat": 18.106,
+    "lng": 83.395
+  },
+  "523": {
+    "hq": "Bhimavaram",
+    "lat": 16.544,
+    "lng": 81.521
+  },
+  "504": {
+    "hq": "Kadapa",
+    "lat": 14.467,
+    "lng": 78.824
+  }
+}

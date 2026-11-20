@@ -1,0 +1,19 @@
+SMART WARD INDIA: MAIL-SAFE COPY
+================================
+Gmail refuses ZIP files that contain script files, so in this copy five files have ".SWI.txt"
+added to their names. Rename them back once, right after extracting and before "npm install".
+
+Windows PowerShell (inside the smart-ward-india folder):
+  Get-ChildItem -Recurse -File -Filter *.SWI.txt | Rename-Item -NewName { $_.Name.Substring(0, $_.Name.Length - 8) }
+
+macOS / Linux (inside the smart-ward-india folder):
+  find . -name '*.SWI.txt' -exec sh -c 'mv "$1" "${1%.SWI.txt}"' _ {} \;
+
+Afterwards these five files must exist (and no file may end in .SWI.txt):
+  next.config.mjs
+  postcss.config.mjs
+  scripts\lgd\convert.mjs
+  scripts\docker\start.sh
+  deploy\backup.sh
+
+You can then delete this RENAME-BACK.txt file.

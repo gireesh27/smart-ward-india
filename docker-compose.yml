@@ -1,0 +1,82 @@
+# Local development services. Credentials are for LOCAL USE ONLY.
+#
+#   docker compose up -d                  -> PostgreSQL + Mailpit (all you need)
+#   docker compose --profile s3 up -d     -> also MinIO, if you want S3-style storage locally
+#   docker compose --profile app up -d --build -> also run the app itself in a container
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: smartward
+      POSTGRES_PASSWORD: smartward_local_only
+      POSTGRES_DB: smartward
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/docker/init-test-db.sql:/docker-entrypoint-initdb.d/10-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartward -d smartward"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Captures every email the app sends. Web inbox: http://localhost:8025
+  # Optional: set MAIL_TRANSPORT=console in .env to print emails to the terminal instead.
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+
+  # OPTIONAL S3-compatible storage. Uploads go to ./storage/uploads by default.
+  # To use MinIO: set STORAGE_DRIVER=s3 and S3_CREATE_BUCKET=true in .env (the app creates the bucket).
+  minio:
+    profiles: ["s3"]
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: smartward
+      MINIO_ROOT_PASSWORD: smartward_local_only
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - miniodata:/data
+
+  app:
+    profiles: ["app"]
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://smartward:smartward_local_only@postgres:5432/smartward?schema=public
+      SMTP_HOST: mailpit
+      STORAGE_DRIVER: local
+      UPLOAD_DIR: /app/storage/uploads
+    volumes:
+      - uploads:/app/storage
+    ports:
+      - "3000:3000"
+
+  # Optional local LLM for AI insights:  docker compose --profile ai up -d
+  # then pull a model once:              docker compose exec ollama ollama pull llama3.1:8b
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ai"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  miniodata:
+  uploads:
+  ollama:
